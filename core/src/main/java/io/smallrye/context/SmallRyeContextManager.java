@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -16,6 +17,7 @@ import org.eclipse.microprofile.context.spi.ContextManager;
 import org.eclipse.microprofile.context.spi.ContextManagerExtension;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 
+import io.smallrye.context.api.ContextualThreadContextProvider;
 import io.smallrye.context.impl.CapturedContextState;
 import io.smallrye.context.impl.DefaultValues;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
@@ -27,6 +29,7 @@ public class SmallRyeContextManager implements ContextManager {
     public static final String[] ALL_REMAINING_ARRAY = new String[] { ThreadContext.ALL_REMAINING };
 
     private List<ThreadContextProvider> providers;
+    private Map<ThreadContextProvider, ContextualThreadContextProvider> contextualProviders;
     private List<ContextManagerExtension> extensions;
     private Map<String, ThreadContextProvider> providersByType;
     private String[] allProviderTypes;
@@ -38,6 +41,7 @@ public class SmallRyeContextManager implements ContextManager {
         this.defaultExecutorService = defaultExecutorService;
         this.providers = new ArrayList<ThreadContextProvider>(providers);
         providersByType = new HashMap<>();
+        Map<ThreadContextProvider, ContextualThreadContextProvider> contextualProviders = new IdentityHashMap<>();
         for (ThreadContextProvider provider : providers) {
             String type = provider.getThreadContextType();
             // check for duplicate providers
@@ -45,7 +49,11 @@ public class SmallRyeContextManager implements ContextManager {
                 throw new IllegalStateException("ThreadContextProvider type already registered: " + type
                         + " first instance: " + providersByType.get(type) + ", second instance: " + provider);
             providersByType.put(type, provider);
+            if (provider instanceof ContextualThreadContextProvider) {
+                contextualProviders.put((ContextualThreadContextProvider) provider, (ContextualThreadContextProvider) provider);
+            }
         }
+        this.contextualProviders = Collections.unmodifiableMap(contextualProviders);
         allProviderTypes = providersByType.keySet().toArray(new String[this.providers.size()]);
         this.extensions = new ArrayList<ContextManagerExtension>(extensions);
         this.defaultValues = new DefaultValues();
@@ -61,7 +69,7 @@ public class SmallRyeContextManager implements ContextManager {
 
     public CapturedContextState captureContext(ThreadContextProviderPlan plan) {
         Map<String, String> props = Collections.emptyMap();
-        return new CapturedContextState(this, plan, props);
+        return new CapturedContextState(this, plan, contextualProviders, props);
     }
 
     // for tests
@@ -202,6 +210,10 @@ public class SmallRyeContextManager implements ContextManager {
             configSourceLoader.forEach(configSource -> {
                 discoveredThreadContextProviders.add(configSource);
             });
+            ServiceLoader<ContextualThreadContextProvider> contextualLoader = ServiceLoader
+                    .load(ContextualThreadContextProvider.class, classLoader);
+            contextualLoader.forEach(provider -> discoveredThreadContextProviders.add(provider));
+
             return discoveredThreadContextProviders;
         }
 

@@ -33,7 +33,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         public R get() {
             ActiveContextState activeState = state.begin();
             try {
-                return supplier.get();
+                return activeState.contextualize(supplier).get();
             } finally {
                 activeState.endContext();
             }
@@ -53,7 +53,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         public void run() {
             ActiveContextState activeState = state.begin();
             try {
-                runnable.run();
+                activeState.contextualize(runnable).run();
             } finally {
                 activeState.endContext();
             }
@@ -73,7 +73,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         public R apply(T t) {
             ActiveContextState activeState = state.begin();
             try {
-                return function.apply(t);
+                return activeState.contextualize(function).apply(t);
             } finally {
                 activeState.endContext();
             }
@@ -93,7 +93,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         public void accept(T t) {
             ActiveContextState activeState = state.begin();
             try {
-                consumer.accept(t);
+                activeState.contextualize(consumer).accept(t);
             } finally {
                 activeState.endContext();
             }
@@ -113,7 +113,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         public R call() throws Exception {
             ActiveContextState activeState = state.begin();
             try {
-                return callable.call();
+                return activeState.contextualize(callable).call();
             } finally {
                 activeState.endContext();
             }
@@ -133,7 +133,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         public R apply(T t, U u) {
             ActiveContextState activeState = state.begin();
             try {
-                return function.apply(t, u);
+                return activeState.contextualize(function).apply(t, u);
             } finally {
                 activeState.endContext();
             }
@@ -153,7 +153,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         public void accept(T t, U u) {
             ActiveContextState activeState = state.begin();
             try {
-                consumer.accept(t, u);
+                activeState.contextualize(consumer).accept(t, u);
             } finally {
                 activeState.endContext();
             }
