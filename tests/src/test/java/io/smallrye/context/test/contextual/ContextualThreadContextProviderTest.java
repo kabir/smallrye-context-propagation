@@ -14,7 +14,7 @@ import org.junit.Test;
  */
 public class ContextualThreadContextProviderTest {
     @Test
-    public void testContextualThreadContextProvider() throws Exception{
+    public void testContextualThreadContextProvider() throws Exception {
         TestContext.initForTest("hello");
         ThreadContext tc = ThreadContext.builder()
                 .propagated(ThreadContext.ALL_REMAINING)

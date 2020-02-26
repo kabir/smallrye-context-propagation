@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 
 import io.smallrye.context.api.ContextualThreadContextProvider;
 
-
 /**
  * @author <a href="mailto:kabir.khan@jboss.com">Kabir Khan</a>
  */
@@ -19,7 +18,6 @@ public class TestContextualThreadContextProvider extends ContextualThreadContext
     protected TestContext readCurrent() {
         return TestContext.getCurrent();
     }
-
 
     @Override
     public <R> Supplier<R> contextualize(Supplier<R> supplier) {

@@ -15,7 +15,7 @@ import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 /**
  * @author <a href="mailto:kabir.khan@jboss.com">Kabir Khan</a>
  */
-public abstract class ContextualThreadContextProvider<T>  implements ThreadContextProvider {
+public abstract class ContextualThreadContextProvider<T> implements ThreadContextProvider {
     private static final ThreadLocal<Object> SNAPSHOTS = new ThreadLocal<>();
 
     public ThreadContextSnapshot currentContext(Map<String, String> props) {
@@ -45,7 +45,7 @@ public abstract class ContextualThreadContextProvider<T>  implements ThreadConte
     protected abstract T readCurrent();
 
     protected T getToPropagate() {
-        return (T)SNAPSHOTS.get();
+        return (T) SNAPSHOTS.get();
     }
 
     public abstract <R> Supplier<R> contextualize(Supplier<R> supplier);

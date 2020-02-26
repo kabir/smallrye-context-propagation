@@ -1,10 +1,8 @@
 package io.smallrye.context.impl;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
@@ -37,6 +35,10 @@ public class CapturedContextState {
             ThreadContextSnapshot snapshot = provider.clearedContext(props);
             if (snapshot != null) {
                 threadContext.add(snapshot);
+            }
+            ContextualThreadContextProvider contextualProvider = contextualProviders.get(provider);
+            if (contextualProvider != null) {
+                this.contextualContexts.add(contextualProvider);
             }
         }
     }
